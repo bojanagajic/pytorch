@@ -2000,7 +2000,7 @@ def cosine_similarity(x1, x2, dim=1, eps=1e-8):
     return w12 / (w1 * w2).clamp(min=eps)
 
 
-def triplet_margin_loss(anchor, positive, negative, margin=1.0, p=2, eps=1e-6, swap=False):
+def triplet_margin_loss(anchor, positive, negative, margin=1.0, p=2, eps=1e-6, swap=False, reduce=False):
     r"""Creates a criterion that measures the triplet loss given an input
     tensors x1, x2, x3 and a margin with a value greater than 0.
     This is used for measuring a relative similarity between samples. A triplet
@@ -2025,6 +2025,7 @@ def triplet_margin_loss(anchor, positive, negative, margin=1.0, p=2, eps=1e-6, s
         p: the norm degree. Default: 2
         eps: small epsilon value to avoid numerical issues. Default: 1e-6
         swap: compute distance swap. Default: ``False``
+        reduce: average the loss. Default: ``False``
 
     Shape:
         - Input: :math:`(N, D)` where `D = vector dimension`
@@ -2053,8 +2054,10 @@ def triplet_margin_loss(anchor, positive, negative, margin=1.0, p=2, eps=1e-6, s
         d_n = torch.min(d_n, d_s)
 
     dist_hinge = torch.clamp(margin + d_p - d_n, min=0.0)
-    loss = torch.mean(dist_hinge)
-    return loss
+    if reduce:
+        return torch.mean(dist_hinge)
+    else:
+        return dist_hinge
 
 
 def normalize(input, p=2, dim=1, eps=1e-12):
